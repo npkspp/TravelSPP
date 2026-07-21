@@ -15,18 +15,8 @@ body { background: #f5f5f7; font-family: Inter, sans-serif; display: flex; heigh
 #resizer { width: 6px; cursor: col-resize; background: #e5e5e5; flex-shrink: 0; }
 #resizer:hover, #resizer.active { background: #ff00dd; }
 #feed { flex: 1; padding: 6px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; height: 100vh; position: relative; }
-
-/* Кнопка нового поста */
-#addPostBtn {
-  position: sticky; top: 0; z-index: 10;
-  background: #ff00dd; color: #fff; border: none;
-  padding: 10px 16px; font-size: 14px; font-family: Inter, sans-serif;
-  cursor: pointer; width: 100%; margin-bottom: 4px;
-  transition: background .2s;
-}
+#addPostBtn { position: sticky; top: 0; z-index: 10; background: #ff00dd; color: #fff; border: none; padding: 10px 16px; font-size: 14px; font-family: Inter, sans-serif; cursor: pointer; width: 100%; margin-bottom: 4px; }
 #addPostBtn:hover { background: #d400b8; }
-
-/* Карточка поста */
 .post-card { background: #fff; border: 1px solid #e5e5e5; padding: 8px 10px; cursor: pointer; display: flex; flex-direction: column; }
 .post-card:hover { border-color: #cfcfcf; }
 .post-row { display: flex; }
@@ -34,37 +24,29 @@ body { background: #f5f5f7; font-family: Inter, sans-serif; display: flex; heigh
 .post-meta { font-size: 12px; color: #8e8e93; margin-bottom: 4px; display: flex; gap: 8px; }
 .post-text { font-size: 14px; line-height: 1.4; color: #111; }
 .post-text p { margin: 0; }
-.post-text img { display: none; }
 .post-thumb { flex-shrink: 0; margin-left: 10px; }
 .post-thumb img { width: 60px; height: 60px; object-fit: cover; }
 .post-author { font-weight: 600; color: #333; }
-
-/* Комментарии */
 .comments-toggle { font-size: 12px; color: #8e8e93; cursor: pointer; margin-top: 6px; padding-top: 6px; border-top: 1px solid #eee; }
-.comments-toggle:hover { color: #ff00dd; }
-.comments-block { display: none; margin-top: 6px; padding-top: 6px; border-top: 1px solid #eee; }
+.comments-block { display: none; margin-top: 6px; }
 .comments-block.open { display: block; }
 .comment { font-size: 13px; padding: 4px 0; border-bottom: 1px solid #f0f0f0; }
 .comment-author { font-weight: 600; color: #555; }
-.comment-text { color: #111; margin-top: 2px; }
 .comment-date { font-size: 11px; color: #aaa; }
 .comment-form { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
 .comment-form input, .comment-form textarea { font-family: Inter, sans-serif; font-size: 13px; padding: 6px; border: 1px solid #e5e5e5; }
 .comment-form button { background: #ff00dd; color: #fff; border: none; padding: 6px; cursor: pointer; font-family: Inter, sans-serif; font-size: 13px; }
-
-/* Модалка */
 .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1000; justify-content: center; align-items: center; }
 .modal-overlay.open { display: flex; }
 .modal { background: #fff; padding: 20px; width: 90%; max-width: 400px; max-height: 90vh; overflow-y: auto; }
-.modal h3 { margin-bottom: 12px; font-size: 18px; }
+.modal h3 { margin-bottom: 12px; }
 .modal label { font-size: 13px; color: #555; display: block; margin-top: 8px; }
 .modal input, .modal textarea { width: 100%; font-family: Inter, sans-serif; font-size: 14px; padding: 8px; border: 1px solid #e5e5e5; margin-top: 4px; }
-.modal textarea { min-height: 80px; resize: vertical; }
+.modal textarea { min-height: 80px; }
 .modal .btn-row { display: flex; gap: 8px; margin-top: 12px; }
 .modal .btn-primary { background: #ff00dd; color: #fff; border: none; padding: 10px 16px; cursor: pointer; font-family: Inter, sans-serif; flex: 1; }
 .modal .btn-secondary { background: #e5e5e5; border: none; padding: 10px 16px; cursor: pointer; font-family: Inter, sans-serif; flex: 1; }
 .modal .btn-geo { background: #eee; border: 1px solid #ddd; padding: 8px; cursor: pointer; font-family: Inter, sans-serif; font-size: 13px; width: 100%; margin-top: 4px; }
-.modal .btn-geo:hover { background: #ddd; }
 .coord-hint { font-size: 11px; color: #999; margin-top: 2px; }
 
 @media (max-width: 768px) {
@@ -76,12 +58,10 @@ body { background: #f5f5f7; font-family: Inter, sans-serif; display: flex; heigh
 </style>
 </head>
 <body>
-
 <div id="map"></div>
 <div id="resizer"></div>
 <div id="feed"></div>
 
-<!-- Модалка нового поста -->
 <div class="modal-overlay" id="postModal">
   <div class="modal">
     <h3>➕ Новый пост</h3>
@@ -93,7 +73,7 @@ body { background: #f5f5f7; font-family: Inter, sans-serif; display: flex; heigh
     <input type="file" id="postPhoto" accept="image/*">
     <label>Координаты (необязательно)</label>
     <button class="btn-geo" id="geoBtn">📍 Определить местоположение</button>
-    <input type="text" id="coordInput" placeholder="Или вручную: 39.723, 73.247">
+    <input type="text" id="coordInput" placeholder="Или вручную: 56.575, 59.865">
     <div class="coord-hint" id="coordStatus"></div>
     <div class="btn-row">
       <button class="btn-secondary" id="cancelBtn">Отмена</button>
@@ -107,15 +87,44 @@ body { background: #f5f5f7; font-family: Inter, sans-serif; display: flex; heigh
 const SUPABASE_URL = "https://kvlybnqrzubxmcmgmuaa.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt2bHlibnFyenVieG1jbWdtdWFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1ODc2MTYsImV4cCI6MjEwMDE2MzYxNn0.E5XqLVc_CJJoKWUt3E1SFEny4tQ1CiLXwrulWk1X6R4";
 
-const map = L.map('map').setView([39.5, 73], 9);
+const map = L.map('map').setView([56.5, 60], 12);
 L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
   attribution: '&copy; Esri', maxZoom: 18
 }).addTo(map);
 
 let markers = [];
-let selectedLat = null;
-let selectedLng = null;
-let selectedFile = null;
+let selectedLat = null, selectedLng = null, selectedFile = null;
+
+// === GPX ТРЕК ===
+fetch('track.gpx')
+  .then(r => r.text())
+  .then(gpxText => {
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(gpxText, 'text/xml');
+    const segs = xml.querySelectorAll('trkseg');
+    const allPoints = [];
+
+    segs.forEach(seg => {
+      const pts = [];
+      seg.querySelectorAll('trkpt').forEach(pt => {
+        const lat = parseFloat(pt.getAttribute('lat'));
+        const lon = parseFloat(pt.getAttribute('lon'));
+        if (!isNaN(lat) && !isNaN(lon)) pts.push([lat, lon]);
+      });
+      if (pts.length > 1) {
+        L.polyline(pts, { color: '#ffd900', weight: 4, opacity: 0.8 }).addTo(map);
+        allPoints.push(...pts);
+      }
+    });
+
+    if (allPoints.length > 0) {
+      const start = allPoints[0];
+      const end = allPoints[allPoints.length - 1];
+      L.circleMarker(start, { radius: 8, fillColor: '#00cc44', color: '#fff', weight: 2, fillOpacity: 1 }).addTo(map).bindTooltip('Старт');
+      L.circleMarker(end, { radius: 8, fillColor: '#ff3333', color: '#fff', weight: 2, fillOpacity: 1 }).addTo(map).bindTooltip('Финиш');
+      map.fitBounds(allPoints, { padding: [30, 30] });
+    }
+  });
 
 // === ЗАГРУЗКА ПОСТОВ ===
 function loadPosts() {
@@ -129,7 +138,6 @@ function loadPosts() {
     markers.forEach(m => map.removeLayer(m));
     markers = [];
 
-    // Кнопка нового поста
     const addBtn = document.createElement('button');
     addBtn.id = 'addPostBtn';
     addBtn.textContent = '➕ Новый пост';
@@ -145,19 +153,17 @@ function loadPosts() {
       const card = document.createElement('div');
       card.className = 'post-card';
       card.dataset.postId = post.id;
-
       let thumbHtml = '';
       if (post.image_urls && post.image_urls.length > 0) {
         thumbHtml = `<img src="${post.image_urls[0]}">`;
       }
       const date = post.local_time_str || new Date(post.created_at).toLocaleDateString('ru-RU', { day:'numeric', month:'long', hour:'2-digit', minute:'2-digit' });
       const author = post.author_name || 'Путешественник';
-
       card.innerHTML = `
         <div class="post-row">
           <div class="post-content">
             <div class="post-meta"><span>${date}</span> <span class="post-author">👤 ${author}</span></div>
-            <div class="post-text"><p>${post.text.replace(/\n/g, '<br>')}</p></div>
+            <div class="post-text"><p>${(post.text || '').replace(/\n/g, '<br>')}</p></div>
           </div>
           <div class="post-thumb">${thumbHtml}</div>
         </div>
@@ -175,8 +181,7 @@ function loadPosts() {
     });
 
     if (posts.some(p => p.lat && p.lng)) {
-      const coords = posts.filter(p => p.lat && p.lng).map(p => [p.lat, p.lng]);
-      map.fitBounds(coords, { padding: [30, 30] });
+      map.fitBounds(posts.filter(p => p.lat && p.lng).map(p => [p.lat, p.lng]), { padding: [30, 30] });
     }
   });
 }
@@ -184,35 +189,16 @@ function loadPosts() {
 // === КОММЕНТАРИИ ===
 function toggleComments(el, postId) {
   const block = document.getElementById(`comments-${postId}`);
-  if (block.classList.contains('open')) {
-    block.classList.remove('open');
-    el.textContent = '💬 Комментарии';
-    return;
-  }
+  if (block.classList.contains('open')) { block.classList.remove('open'); el.textContent = '💬 Комментарии'; return; }
   block.classList.add('open');
   el.textContent = '💬 Загрузка...';
-
-  fetch(`${SUPABASE_URL}/rest/v1/comments?post_id=eq.${postId}&order=created_at.asc`, {
-    headers: { apikey: SUPABASE_ANON_KEY }
-  })
-  .then(r => r.json())
-  .then(comments => {
-    let html = '';
-    if (comments.length === 0) {
-      html = '<div style="font-size:13px;color:#999;padding:4px 0;">Пока нет комментариев</div>';
-    } else {
-      comments.forEach(c => {
-        const d = new Date(c.created_at).toLocaleDateString('ru-RU', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
-        html += `<div class="comment"><div class="comment-author">${escapeHtml(c.author_name)}</div><div class="comment-text">${escapeHtml(c.text)}</div><div class="comment-date">${d}</div></div>`;
-      });
-    }
-    html += `
-      <div class="comment-form">
-        <input type="text" id="commentName-${postId}" placeholder="Ваше имя">
-        <textarea id="commentText-${postId}" placeholder="Напишите комментарий..." rows="2"></textarea>
-        <button onclick="postComment(${postId})">Отправить</button>
-      </div>
-    `;
+  fetch(`${SUPABASE_URL}/rest/v1/comments?post_id=eq.${postId}&order=created_at.asc`, { headers: { apikey: SUPABASE_ANON_KEY } })
+  .then(r => r.json()).then(comments => {
+    let html = comments.length === 0 ? '<div style="font-size:13px;color:#999;padding:4px 0;">Пока нет комментариев</div>' : comments.map(c => {
+      const d = new Date(c.created_at).toLocaleDateString('ru-RU', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+      return `<div class="comment"><div class="comment-author">${esc(c.author_name)}</div><div class="comment-text">${esc(c.text)}</div><div class="comment-date">${d}</div></div>`;
+    }).join('');
+    html += `<div class="comment-form"><input type="text" id="commentName-${postId}" placeholder="Ваше имя"><textarea id="commentText-${postId}" placeholder="Напишите комментарий..." rows="2"></textarea><button onclick="postComment(${postId})">Отправить</button></div>`;
     block.innerHTML = html;
     el.textContent = `💬 ${comments.length} комментариев`;
   });
@@ -222,123 +208,57 @@ function postComment(postId) {
   const name = document.getElementById(`commentName-${postId}`).value.trim();
   const text = document.getElementById(`commentText-${postId}`).value.trim();
   if (!name || !text) { alert('Заполните имя и текст'); return; }
-
   fetch(`${SUPABASE_URL}/rest/v1/comments`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'apikey': SUPABASE_ANON_KEY,
-      'Prefer': 'return=minimal'
-    },
+    headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY, Prefer: 'return=minimal' },
     body: JSON.stringify({ post_id: postId, author_name: name, text: text })
-  })
-  .then(r => {
-    if (r.status >= 200 && r.status < 300) {
-      document.getElementById(`commentName-${postId}`).value = '';
-      document.getElementById(`commentText-${postId}`).value = '';
-      // Обновим comments
-      const el = document.querySelector(`#comments-${postId}`).previousElementSibling;
-      if (el && el.classList.contains('comments-toggle')) {
-        el.click();
-        setTimeout(() => el.click(), 100);
-      }
-    } else {
-      alert('Ошибка при отправке комментария');
-    }
-  })
-  .catch(() => alert('Ошибка сети'));
+  }).then(r => { if (r.ok) { document.getElementById(`commentName-${postId}`).value = ''; document.getElementById(`commentText-${postId}`).value = ''; toggleComments(document.querySelector(`#comments-${postId}`).previousElementSibling, postId); } else { alert('Ошибка'); } });
 }
 
-function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
-// === МОДАЛКА НОВОГО ПОСТА ===
+// === МОДАЛКА ===
 function openModal() {
   document.getElementById('postModal').classList.add('open');
-  selectedLat = null;
-  selectedLng = null;
-  selectedFile = null;
-  document.getElementById('authorName').value = '';
-  document.getElementById('postText').value = '';
+  selectedLat = null; selectedLng = null; selectedFile = null;
+  ['authorName','postText','coordInput'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('postPhoto').value = '';
-  document.getElementById('coordInput').value = '';
   document.getElementById('coordStatus').textContent = '';
 }
-document.getElementById('cancelBtn').onclick = () => {
-  document.getElementById('postModal').classList.remove('open');
-};
-document.getElementById('postModal').onclick = (e) => {
-  if (e.target === e.currentTarget) document.getElementById('postModal').classList.remove('open');
-};
-
-document.getElementById('postPhoto').onchange = (e) => {
-  selectedFile = e.target.files[0] || null;
-};
-
+document.getElementById('cancelBtn').onclick = () => document.getElementById('postModal').classList.remove('open');
+document.getElementById('postModal').onclick = (e) => { if (e.target === e.currentTarget) document.getElementById('postModal').classList.remove('open'); };
+document.getElementById('postPhoto').onchange = (e) => { selectedFile = e.target.files[0] || null; };
 document.getElementById('geoBtn').onclick = () => {
-  if (!navigator.geolocation) {
-    document.getElementById('coordStatus').textContent = 'Геолокация не поддерживается';
-    return;
-  }
+  if (!navigator.geolocation) { document.getElementById('coordStatus').textContent = 'Геолокация не поддерживается'; return; }
   document.getElementById('coordStatus').textContent = 'Определяю...';
   navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      selectedLat = pos.coords.latitude;
-      selectedLng = pos.coords.longitude;
-      document.getElementById('coordInput').value = `${selectedLat.toFixed(6)}, ${selectedLng.toFixed(6)}`;
-      document.getElementById('coordStatus').textContent = '✅ Координаты определены';
-    },
-    () => {
-      document.getElementById('coordStatus').textContent = '❌ Не удалось определить. Введите вручную.';
-    }
+    (pos) => { selectedLat = pos.coords.latitude; selectedLng = pos.coords.longitude; document.getElementById('coordInput').value = `${selectedLat.toFixed(6)}, ${selectedLng.toFixed(6)}`; document.getElementById('coordStatus').textContent = '✅ Координаты определены'; },
+    () => { document.getElementById('coordStatus').textContent = '❌ Не удалось'; }
   );
 };
-
 document.getElementById('coordInput').oninput = (e) => {
-  const val = e.target.value.trim();
-  const match = val.match(/^([\d\.\-]+)\s*[,;:\s]+\s*([\d\.\-]+)$/);
-  if (match) {
-    selectedLat = parseFloat(match[1]);
-    selectedLng = parseFloat(match[2]);
-    document.getElementById('coordStatus').textContent = '✅ Координаты введены';
-  } else {
-    selectedLat = null;
-    selectedLng = null;
-    if (val) document.getElementById('coordStatus').textContent = '❌ Формат: 39.723, 73.247';
-    else document.getElementById('coordStatus').textContent = '';
-  }
+  const v = e.target.value.trim();
+  const m = v.match(/^([\d\.\-]+)\s*[,;:\s]+\s*([\d\.\-]+)$/);
+  if (m) { selectedLat = parseFloat(m[1]); selectedLng = parseFloat(m[2]); document.getElementById('coordStatus').textContent = '✅ Координаты введены'; }
+  else { selectedLat = null; selectedLng = null; if (v) document.getElementById('coordStatus').textContent = '❌ Формат: 56.575, 59.865'; else document.getElementById('coordStatus').textContent = ''; }
 };
-
 document.getElementById('publishBtn').onclick = async () => {
   const name = document.getElementById('authorName').value.trim();
   const text = document.getElementById('postText').value.trim();
   if (!name) { alert('Введите ваше имя'); return; }
   if (!text) { alert('Введите текст поста'); return; }
-
   document.getElementById('publishBtn').textContent = '⏳ Публикую...';
   document.getElementById('publishBtn').disabled = true;
 
   let imageUrls = null;
-
-  // Загружаем фото если есть
   if (selectedFile) {
-    const filename = `${Date.now()}_${selectedFile.name}`;
+    const fname = Date.now() + '_' + selectedFile.name;
     try {
-      const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/photos/${filename}`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
-        body: selectedFile
-      });
-      if (uploadRes.ok || uploadRes.status === 200) {
-        imageUrls = [`${SUPABASE_URL}/storage/v1/object/photos/${filename}`];
-      }
-    } catch(e) { console.log('Upload error:', e); }
+      const upRes = await fetch(`${SUPABASE_URL}/storage/v1/object/photos/${fname}`, { method: 'POST', headers: { Authorization: 'Bearer ' + SUPABASE_ANON_KEY }, body: selectedFile });
+      if (upRes.ok) imageUrls = [`${SUPABASE_URL}/storage/v1/object/photos/${fname}`];
+    } catch(e) {}
   }
 
-  // Создаём пост
   const now = new Date();
   const months = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
   const localTimeStr = `${now.getDate()} ${months[now.getMonth()]}, ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
@@ -346,40 +266,26 @@ document.getElementById('publishBtn').onclick = async () => {
   try {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/posts`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_ANON_KEY,
-        'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify({
-        text: text,
-        author_name: name,
-        image_urls: imageUrls,
-        lat: selectedLat,
-        lng: selectedLng,
-        local_time_str: localTimeStr
-      })
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ text, author_name: name, image_urls: imageUrls, lat: selectedLat, lng: selectedLng, local_time_str: localTimeStr })
     });
-
     if (res.ok || res.status === 201) {
       document.getElementById('postModal').classList.remove('open');
       loadPosts();
     } else {
-      alert('Ошибка при публикации');
+      const errText = await res.text();
+      alert('Ошибка при публикации: ' + errText);
     }
-  } catch(e) {
-    alert('Ошибка сети');
-  }
+  } catch(e) { alert('Ошибка сети'); }
 
   document.getElementById('publishBtn').textContent = 'Опубликовать';
   document.getElementById('publishBtn').disabled = false;
 };
 
-// === РЕСАЙЗЕР ===
+// === ЗАПУСК ===
 loadPosts();
 
-const resizer = document.getElementById('resizer');
-const mapEl = document.getElementById('map');
+const resizer = document.getElementById('resizer'), mapEl = document.getElementById('map');
 let isResizing = false;
 resizer.addEventListener('mousedown', () => { isResizing = true; document.body.style.userSelect = 'none'; });
 document.addEventListener('mousemove', (e) => {
