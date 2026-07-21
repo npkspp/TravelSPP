@@ -13,19 +13,17 @@
 body { background: #f5f5f7; font-family: Inter, sans-serif; display: flex; height: 100vh; overflow: hidden; }
 #map { width: 60%; height: 100vh; flex-shrink: 0; }
 #resizer { width: 6px; cursor: col-resize; background: #e5e5e5; flex-shrink: 0; }
-#resizer:hover, #resizer.active { background: #ff00dd; }
 #feed { flex: 1; padding: 6px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; height: 100vh; position: relative; }
 #addPostBtn { position: sticky; top: 0; z-index: 10; background: #ff00dd; color: #fff; border: none; padding: 10px 16px; font-size: 14px; font-family: Inter, sans-serif; cursor: pointer; width: 100%; margin-bottom: 4px; }
-#addPostBtn:hover { background: #d400b8; }
-.post-card { background: #fff; border: 1px solid #e5e5e5; padding: 8px 10px; cursor: pointer; display: flex; flex-direction: column; }
-.post-card:hover { border-color: #cfcfcf; }
+.post-card { background: #fff; border: 1px solid #e5e5e5; padding: 8px 10px; display: flex; flex-direction: column; }
 .post-row { display: flex; }
 .post-content { flex: 1; overflow: hidden; }
 .post-meta { font-size: 12px; color: #8e8e93; margin-bottom: 4px; display: flex; gap: 8px; }
 .post-text { font-size: 14px; line-height: 1.4; color: #111; }
 .post-text p { margin: 0; }
+.post-text img { display: none; }
 .post-thumb { flex-shrink: 0; margin-left: 10px; }
-.post-thumb img { width: 60px; height: 60px; object-fit: cover; }
+.post-thumb img { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; }
 .post-author { font-weight: 600; color: #333; }
 .comments-toggle { font-size: 12px; color: #8e8e93; cursor: pointer; margin-top: 6px; padding-top: 6px; border-top: 1px solid #eee; }
 .comments-block { display: none; margin-top: 6px; }
@@ -39,7 +37,7 @@ body { background: #f5f5f7; font-family: Inter, sans-serif; display: flex; heigh
 
 .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1000; justify-content: center; align-items: center; }
 .modal-overlay.open { display: flex !important; }
-.modal { background: #fff; padding: 20px; width: 90%; max-width: 400px; }
+.modal { background: #fff; padding: 20px; width: 90%; max-width: 400px; max-height: 90vh; overflow-y: auto; }
 .modal h3 { margin-bottom: 12px; }
 .modal label { font-size: 13px; color: #555; display: block; margin-top: 8px; }
 .modal input, .modal textarea { width: 100%; font-family: Inter, sans-serif; font-size: 14px; padding: 8px; border: 1px solid #e5e5e5; margin-top: 4px; }
@@ -65,6 +63,8 @@ body { background: #f5f5f7; font-family: Inter, sans-serif; display: flex; heigh
 <div class="modal-overlay" id="postModal">
   <div class="modal">
     <h3>➕ Новый пост</h3>
+    <label>🔑 Кодовое слово (только для авторов)</label>
+    <input type="password" id="secretKey" placeholder="Введите секретное слово">
     <label>Ваше имя</label>
     <input type="text" id="authorName" placeholder="Например: Дмитрий">
     <label>Текст поста</label>
@@ -79,28 +79,30 @@ body { background: #f5f5f7; font-family: Inter, sans-serif; display: flex; heigh
       <button class="btn-secondary" id="cancelBtn">Отмена</button>
       <button class="btn-primary" id="publishBtn">Опубликовать</button>
     </div>
+    <div style="margin-top:8px;font-size:11px;color:#999;">💡 Комментарии может оставить любой желающий</div>
   </div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+// ⚠️ УСТАНОВИ СВОЁ СЕКРЕТНОЕ СЛОВО (замени "pamir2026" на своё)
+const SECRET = "pamir2026";
+
 const SUPABASE_URL = "https://kvlybnqrzubxmcmgmuaa.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt2bHlibnFyenVieG1jbWdtdWFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1ODc2MTYsImV4cCI6MjEwMDE2MzYxNn0.E5XqLVc_CJJoKWUt3E1SFEny4tQ1CiLXwrulWk1X6R4";
 
 const map = L.map('map').setView([56.5, 60], 12);
 L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { attribution: '&copy; Esri', maxZoom: 18 }).addTo(map);
 
-let markers = [];
-let slat = null, slng = null, sfile = null;
+let markers = [], slat = null, slng = null, sfile = null;
 const months = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 
-// GPX
+// GPX трек
 fetch('track.gpx').then(r=>r.text()).then(t=>{
   const x = new DOMParser().parseFromString(t,'text/xml');
   const all = [];
   x.querySelectorAll('trkseg').forEach(s=>{
-    const p=[];
-    s.querySelectorAll('trkpt').forEach(pt=>{
+    const p=[]; s.querySelectorAll('trkpt').forEach(pt=>{
       const a=parseFloat(pt.getAttribute('lat')),b=parseFloat(pt.getAttribute('lon'));
       if(!isNaN(a)&&!isNaN(b)) p.push([a,b]);
     });
@@ -120,13 +122,13 @@ async function loadPosts(){
     const feed=document.getElementById('feed');
     feed.innerHTML='<button id="addPostBtn" onclick="document.getElementById(\'postModal\').classList.add(\'open\')">➕ Новый пост</button>';
     markers.forEach(m=>map.removeLayer(m)); markers=[];
-    if(!posts||posts.length===0){ feed.innerHTML+='<div style="padding:20px;text-align:center;color:#999;">Пока нет постов. Напиши первый!</div>'; return; }
+    if(!posts||posts.length===0){ feed.innerHTML+='<div style="padding:20px;text-align:center;color:#999;">Пока нет постов.</div>'; return; }
     posts.forEach(p=>{
-      const c=document.createElement('div'); c.className='post-card'; c.dataset.postId=p.id;
+      const c=document.createElement('div'); c.className='post-card';
       const th=p.image_urls&&p.image_urls.length?`<img src="${p.image_urls[0]}">`:'';
       const d=p.local_time_str||new Date(p.created_at).toLocaleDateString('ru-RU',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
       const a=p.author_name||'Путешественник';
-      c.innerHTML=`<div class="post-row"><div class="post-content"><div class="post-meta"><span>${d}</span> <span class="post-author">👤 ${a}</span></div><div class="post-text"><p>${(p.text||'').replace(/\n/g,'<br>')}</p></div></div><div class="post-thumb">${th}</div></div><div class="comments-toggle" onclick="toggleComments(this,${p.id})">💬 Загрузить комментарии</div><div class="comments-block" id="comments-${p.id}"></div>`;
+      c.innerHTML=`<div class="post-row"><div class="post-content"><div class="post-meta"><span>${d}</span> <span class="post-author">👤 ${a}</span></div><div class="post-text"><p>${esc(p.text||'')}</p></div></div><div class="post-thumb">${th}</div></div><div class="comments-toggle" data-pid="${p.id}">💬 Комментарии</div><div class="comments-block" id="comments-${p.id}"></div>`;
       feed.appendChild(c);
       if(p.lat&&p.lng){
         const m=L.circleMarker([p.lat,p.lng],{radius:6,fillColor:'#ff00dd',color:'#fff',weight:1,fillOpacity:.8}).addTo(map);
@@ -135,14 +137,15 @@ async function loadPosts(){
         markers.push(m);
       }
     });
+    document.querySelectorAll('.comments-toggle').forEach(el=>{el.onclick=()=>toggleComments(el);});
     if(posts.some(p=>p.lat&&p.lng)) map.fitBounds(posts.filter(p=>p.lat&&p.lng).map(p=>[p.lat,p.lng]),{padding:[30,30]});
-  }catch(e){ document.getElementById('feed').innerHTML='<button onclick="location.reload()" style="margin:10px;padding:10px;">🔄 Ошибка загрузки. Нажми для обновления</button>'; console.error(e); }
+  }catch(e){console.error(e);}
 }
 
-async function toggleComments(el,pid){
-  const b=document.getElementById('comments-'+pid);
-  if(b.classList.contains('open')){ b.classList.remove('open'); el.textContent='💬 Комментарии'; return; }
-  b.classList.add('open'); el.textContent='💬 Загрузка...';
+async function toggleComments(el){
+  const pid=el.dataset.pid, b=document.getElementById('comments-'+pid);
+  if(b.classList.contains('open')){ b.classList.remove('open'); b.innerHTML=''; el.textContent='💬 Комментарии'; return; }
+  el.textContent='💬 Загрузка...';
   try{
     const r=await fetch(`${SUPABASE_URL}/rest/v1/comments?post_id=eq.${pid}&order=created_at.asc`,{headers:{apikey:SUPABASE_ANON_KEY}});
     const comments=await r.json();
@@ -150,23 +153,30 @@ async function toggleComments(el,pid){
       const dd=new Date(c.created_at).toLocaleDateString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
       return `<div class="comment"><div class="comment-author">${esc(c.author_name)}</div><div class="comment-text">${esc(c.text)}</div><div class="comment-date">${dd}</div></div>`;
     }).join('');
-    h+=`<div class="comment-form"><input type="text" id="cn-${pid}" placeholder="Ваше имя"><textarea id="ct-${pid}" placeholder="Напишите комментарий..." rows="2"></textarea><button onclick="postComment(${pid})">Отправить</button></div>`;
-    b.innerHTML=h; el.textContent=`💬 ${comments.length} комментариев`;
-  }catch(e){}
+    h+=`<div class="comment-form"><input type="text" id="cn-${pid}" placeholder="Ваше имя"><textarea id="ct-${pid}" placeholder="Напишите комментарий..." rows="2"></textarea><button onclick="postComment(${pid},this)">Отправить</button></div>`;
+    b.innerHTML=h; b.classList.add('open'); el.textContent=`💬 ${comments.length} комментариев`;
+  }catch(e){alert('Ошибка загрузки комментариев');}
 }
 
-async function postComment(pid){
+async function postComment(pid,btn){
   const name=document.getElementById('cn-'+pid).value.trim(),text=document.getElementById('ct-'+pid).value.trim();
   if(!name||!text){alert('Заполните имя и текст');return;}
+  btn.disabled=true;
   try{
-    await fetch(`${SUPABASE_URL}/rest/v1/comments`,{method:'POST',headers:{'Content-Type':'application/json',apikey:SUPABASE_ANON_KEY,Prefer:'return=minimal'},body:JSON.stringify({post_id:pid,author_name:name,text:text})});
-    document.getElementById('cn-'+pid).value=''; document.getElementById('ct-'+pid).value='';
-    toggleComments(document.getElementById('comments-'+pid).previousElementSibling,pid);
-  }catch(e){alert('Ошибка');}
+    const r=await fetch(`${SUPABASE_URL}/rest/v1/comments`,{method:'POST',headers:{'Content-Type':'application/json',apikey:SUPABASE_ANON_KEY,Prefer:'return=minimal'},body:JSON.stringify({post_id:pid,author_name:name,text:text})});
+    if(r.ok||r.status===201){
+      document.getElementById('cn-'+pid).value=''; document.getElementById('ct-'+pid).value='';
+      btn.disabled=false;
+      // Перезагрузить комментарии
+      document.getElementById('comments-'+pid).classList.remove('open');
+      toggleComments(document.querySelector(`.comments-toggle[data-pid="${pid}"]`));
+    } else { alert('Ошибка при отправке'); btn.disabled=false; }
+  }catch(e){alert('Ошибка сети'); btn.disabled=false;}
 }
+
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 
-// Modal
+// Модалка
 document.getElementById('cancelBtn').onclick=()=>document.getElementById('postModal').classList.remove('open');
 document.getElementById('postModal').onclick=function(e){if(e.target===this)this.classList.remove('open');}
 document.getElementById('postPhoto').onchange=function(e){sfile=e.target.files[0]||null;}
@@ -184,6 +194,8 @@ document.getElementById('coordInput').oninput=function(){
   else{slat=null;slng=null;document.getElementById('coordStatus').textContent=v?'❌ Формат: 56.575, 59.865':'';}
 }
 document.getElementById('publishBtn').onclick=async function(){
+  const key=document.getElementById('secretKey').value.trim();
+  if(key!==SECRET){alert('❌ Неверное кодовое слово. Пост может опубликовать только автор.');return;}
   const name=document.getElementById('authorName').value.trim(),text=document.getElementById('postText').value.trim();
   if(!name){alert('Введите ваше имя');return;}
   if(!text){alert('Введите текст поста');return;}
